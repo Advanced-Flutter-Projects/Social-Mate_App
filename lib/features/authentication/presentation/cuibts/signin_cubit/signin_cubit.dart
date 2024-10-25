@@ -1,0 +1,32 @@
+import 'package:bloc/bloc.dart';
+import 'package:meta/meta.dart';
+import 'package:social_app/features/authentication/domain/entites/user_entity.dart';
+import 'package:social_app/features/authentication/domain/repos/auth_repo.dart';
+
+part 'signin_state.dart';
+
+class SigninCubit extends Cubit<SigninState> {
+  SigninCubit(this.authRepo) : super(SigninInitial());
+  final AuthRepo authRepo;
+
+  Future<void> SigninUser(
+    String name,
+    String email,
+  ) async {
+    emit(SigninLoading());
+    final result = await authRepo.signInWithEmailAndPassword(
+      name,
+      email,
+    );
+    result.fold(
+      (failure) => emit(
+        SigninFailure(
+          message: failure.message,
+        ),
+      ),
+      (userEntity) => emit(
+        SigninSuccess(userEntity: userEntity),
+      ),
+    );
+  }
+}
